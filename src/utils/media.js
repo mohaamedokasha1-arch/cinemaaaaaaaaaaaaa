@@ -1,3 +1,5 @@
+import { safeText, toMediaSrc, toPosterSrc } from './paths';
+
 // Render only known video providers. User-supplied HTML is never injected into the page.
 export function getTrustedEmbedSrc(value) {
   if (!value || typeof value !== 'string') return null;
@@ -32,20 +34,22 @@ export function getTrustedEmbedSrc(value) {
   return null;
 }
 
+/**
+ * Any link or path the admin typed for a video / subtitle file.
+ * The old strict pattern (https:// only, or /media/...) is gone: local paths,
+ * CDN links with query strings and plain file names are all accepted now.
+ */
 export function getSafeMediaSrc(value) {
-  if (!value || typeof value !== 'string') return null;
-  const candidate = value.trim();
-  // Permit local uploads added to the public/media directory by the site owner.
-  if (/^\/media\/[\w./%-]+$/.test(candidate) && !candidate.includes('..')) return candidate;
-  try {
-    const url = new URL(candidate);
-    return url.protocol === 'https:' ? url.href : null;
-  } catch { return null; }
+  return toMediaSrc(value) || null;
 }
 
+/**
+ * Any link or path the admin typed for a poster.
+ * https, http, protocol-relative, /images/..., images/x.jpg, poster.jpg and
+ * bare names (looked up in /images/) all pass through untouched.
+ */
 export function getSafePosterSrc(value) {
-  if (!value || typeof value !== 'string') return null;
-  const candidate = value.trim();
-  if (/^\/images\/[\w./%-]+$/.test(candidate) && !candidate.includes('..')) return candidate;
-  return getSafeMediaSrc(candidate);
+  return toPosterSrc(value) || null;
 }
+
+export { safeText };
