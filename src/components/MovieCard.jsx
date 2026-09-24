@@ -10,7 +10,7 @@ export default function MovieCard({ movie }) {
   useEffect(() => setImageError(false), [movie.poster]);
   const isFavorite = favorites.includes(movie.id);
   const title = movie.titleAr || movie.title || 'بدون عنوان';
-  const source = !imageError && getSafePosterSrc(movie.poster) ? movie.poster : '/images/poster-fallback.svg';
+  const source = getSafePosterSrc(movie.poster) || '/images/poster-fallback.svg';
 
   return (
     <article className="movie-card">

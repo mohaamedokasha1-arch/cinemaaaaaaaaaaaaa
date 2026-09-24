@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowRight, CalendarDays, Clock3, ExternalLink, Heart, Link2, Play, Star, VideoOff } from 'lucide-react';
 import { useMovies } from '../context/MoviesContext';
-import { getSafeMediaSrc, getSafePosterSrc, getTrustedEmbedSrc } from '../utils/media';
+import { getSafeMediaSrc, getSafePosterSrc, getTrustedEmbedSrc, safeText } from '../utils/media';
 import MovieCard from '../components/MovieCard';
 
 export default function WatchPage() {
@@ -75,7 +75,7 @@ export default function WatchPage() {
             ) : embed ? (
               <iframe title={`المقطع الدعائي: ${title}`} src={`${embed}${embed.includes('?') ? '&' : '?'}autoplay=1`} allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
             ) : (
-              <div className="player-empty"><VideoOff size={38} /><strong>لا يوجد فيديو متاح حاليًا</strong><p>يمكن إضافة مقطع أو فيديو مرخّص من لوحة الإدارة.</p></div>
+              <div className="player-empty"><VideoOff size={38} /><strong>لا يوجد فيديو قابل للتشغيل تلقائيًا</strong><p>{movie.embedCode ? 'المقطع المضاف لا يعمل داخل الصفحة (روابط YouTube وVimeo فقط).' : 'يمكن إضافة مقطع أو فيديو من لوحة الإدارة.'}</p>{movie.embedCode && <a className="button button--outline" href={getSafeMediaSrc(movie.embedCode) || safeText(movie.embedCode)} target="_blank" rel="noopener noreferrer">فتح الرابط المُضاف <ExternalLink size={15} /></a>}</div>
             )}
           </div>
           <div className="player-footnote"><span className="player-footnote__dot" /><span>{directVideo ? 'فيديو مضاف من لوحة الإدارة. تتوفر الترجمة إن تم ربط ملف VTT.' : 'الفيديو المعروض مقطع دعائي للتجربة، وليس الفيلم أو الحلقة كاملة.'}</span>{!directVideo && embed && <a href={embed} target="_blank" rel="noopener noreferrer">فتح المقطع <ExternalLink size={14} /></a>}</div>
