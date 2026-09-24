@@ -7,6 +7,8 @@ const links = [
   { label: 'الرئيسية', to: '/', key: 'all' },
   { label: 'الأفلام', to: '/?type=movie', key: 'movie' },
   { label: 'المسلسلات', to: '/?type=series', key: 'series' },
+  { label: 'مدبلج 🎙️', to: '/?type=dubbed', key: 'dubbed' },
+  { label: 'الرائج 🔥', to: '/?type=trending', key: 'trending' },
   { label: 'قائمتي', to: '/?type=favorites', key: 'favorites', icon: Heart },
 ];
 
