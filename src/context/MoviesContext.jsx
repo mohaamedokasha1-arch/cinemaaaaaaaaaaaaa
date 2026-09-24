@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { storage } from '../utils/storage';
+import apiClient from '../utils/api';
 
 const MoviesContext = createContext(null);
 
@@ -16,11 +17,32 @@ export function MoviesProvider({ children }) {
   });
   const [favorites, setFavorites] = useState(() => storage.getFavorites());
   const [isAdmin, setIsAdmin] = useState(() => storage.isAuthenticated());
+  const [loading, setLoading] = useState(true);
+  const [backendStatus, setBackendStatus] = useState('checking');
+
+  // Initial fetch from backend
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const backendMovies = await apiClient.getMovies();
+        if (backendMovies && backendMovies.length > 0) {
+          setMovies(backendMovies);
+          setBackendStatus('connected');
+        } else {
+          setBackendStatus('local');
+        }
+      } catch {
+        setBackendStatus('local');
+      } finally {
+        setLoading(false);
+      }
+    };
+    init();
+  }, []);
 
   // Keep multiple tabs of the same browser in sync.
   useEffect(() => {
     const sync = () => {
-      setMovies(storage.getMovies());
       setFavorites(storage.getFavorites());
       setIsAdmin(storage.isAuthenticated());
     };
@@ -28,19 +50,53 @@ export function MoviesProvider({ children }) {
     return () => window.removeEventListener('storage', sync);
   }, []);
 
-  const addMovie = (movie) => {
+  const refreshMovies = async () => {
+    try {
+      const backendMovies = await apiClient.getMovies();
+      if (backendMovies && backendMovies.length > 0) {
+        setMovies(backendMovies);
+        setBackendStatus('connected');
+        return;
+      }
+    } catch {}
+    setMovies(storage.getMovies());
+  };
+
+  const addMovie = async (movie) => {
+    try {
+      const result = await apiClient.addMovie(movie);
+      if (result.success) {
+        await refreshMovies();
+        return result;
+      }
+    } catch {}
     const result = storage.addMovie(movie);
     if (result.success) setMovies(storage.getMovies());
     return result;
   };
 
-  const updateMovie = (id, changes) => {
+  const updateMovie = async (id, changes) => {
+    try {
+      const success = await apiClient.updateMovie(id, changes);
+      if (success) {
+        await refreshMovies();
+        return true;
+      }
+    } catch {}
     const success = storage.updateMovie(id, changes);
     if (success) setMovies(storage.getMovies());
     return success;
   };
 
-  const deleteMovie = (id) => {
+  const deleteMovie = async (id) => {
+    try {
+      const success = await apiClient.deleteMovie(id);
+      if (success) {
+        await refreshMovies();
+        setFavorites(storage.getFavorites());
+        return true;
+      }
+    } catch {}
     const success = storage.deleteMovie(id);
     if (success) {
       setMovies(storage.getMovies());
@@ -70,7 +126,10 @@ export function MoviesProvider({ children }) {
     <MoviesContext.Provider value={{
       movies, favorites, isAdmin, addMovie, updateMovie, deleteMovie,
       toggleFavorite, login, logout,
-      refreshMovies: () => setMovies(storage.getMovies()),
+      refreshMovies,
+      loading,
+      backendStatus,
+      apiClient
     }}>
       {children}
     </MoviesContext.Provider>

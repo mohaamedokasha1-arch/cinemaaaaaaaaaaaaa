@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import WatchPage from './pages/WatchPage';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import MonitoringPage from './pages/MonitoringPage';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -21,7 +22,7 @@ function NotFound() {
 }
 
 function AppRoutes() {
-  return <div className="app-shell"><ScrollToTop /><Navbar /><Routes><Route path="/" element={<Home />} /><Route path="/watch/:id" element={<WatchPage />} /><Route path="/admin/login" element={<AdminLogin />} /><Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} /><Route path="*" element={<NotFound />} /></Routes><Footer /></div>;
+  return <div className="app-shell"><ScrollToTop /><Navbar /><Routes><Route path="/" element={<Home />} /><Route path="/watch/:id" element={<WatchPage />} /><Route path="/admin/login" element={<AdminLogin />} /><Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} /><Route path="/admin/monitoring" element={<AdminRoute><MonitoringPage /></AdminRoute>} /><Route path="*" element={<NotFound />} /></Routes><Footer /></div>;
 }
 
 export default function App() {
